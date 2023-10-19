@@ -6,6 +6,7 @@
 ///Do not touch vertex shader!
 ///
 ///Vulkan version is not necessary - you are only working with shaders.
+///But if you have to...
 
 #include<geGL/geGL.h>
 #include<glm/glm.hpp>
@@ -15,7 +16,7 @@
 #include<imguiVars/addVarsLimits.h>
 
 #include<framework/methodRegister.hpp>
-#include<framework/defineGLSLVersion.hpp>
+#include<framework/makeProgram.hpp>
 #include<PGR/01/emptyWindow.hpp>
 
 using namespace emptyWindow;
@@ -28,19 +29,24 @@ shared_ptr<Program    >program;
 shared_ptr<VertexArray>vao    ;
 
 void onInit(vars::Vars&vars){
-  auto vertSrc = defineGLSLVersion()+R".(
+  auto src = R".(
+  #ifdef  VERTEX_SHADER
   void main() {
     if(gl_VertexID == 0)gl_Position = vec4(-.5,-.5,0,1);
     if(gl_VertexID == 1)gl_Position = vec4(+.5,-.5,0,1);
     if(gl_VertexID == 2)gl_Position = vec4(-.5,+.5,0,1);
     if(gl_VertexID == 3)gl_Position = vec4(+.5,+.5,0,1);
-  }).";
+  }
+  #endif//VERTEX_SHADER
   
+
+
+  #ifdef  GEOMETRY_SHADER
   ///\todo Homework 2. Reimplement geometry shader.
-  /// This geometry shader should replace an input point
+  /// The geometry shader should replace an input point
   /// with flag of Czech Republic.
-  auto geomSrc = defineGLSLVersion()+R".(
-  
+  /// every point should be replaced with Czech Republic flag.
+
   layout(points)in;
   layout(points,max_vertices=1)out;
   
@@ -49,21 +55,20 @@ void onInit(vars::Vars&vars){
     EmitVertex();
     EndPrimitive();
   }
-  ).";
+  #endif//GEOMETRY_SHADER
 
-  auto fragSrc = defineGLSLVersion()+ R".(
+
+  #ifdef FRAGMENT_SHADER
   out vec4 fColor;
   
   void main(){
     fColor = vec4(1,1,1,1);
-  }).";
+  }
+  #endif//FRAGMENT_SHADER
+  ).";
 
   //create shader program
-  auto vs = make_shared<Shader>(GL_VERTEX_SHADER  ,vertSrc);
-  auto gs = make_shared<Shader>(GL_GEOMETRY_SHADER,geomSrc);
-  auto fs = make_shared<Shader>(GL_FRAGMENT_SHADER,fragSrc);
-
-  program = make_shared<ge::gl::Program>(vs,gs,fs);
+  program = makeProgram(src);
   vao     = make_shared<ge::gl::VertexArray>();
   
   glClearColor(0,0,0,1);
