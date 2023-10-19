@@ -36,7 +36,9 @@ shared_ptr<Program>makeProgram(std::string const&src){
   if(hasShader(src,a))shaders.push_back(makeShader(a,defineGLSLVersion()+"\n#define     " b " \n"+src));
   APPLY_ON_GL_SHADERS(MAKE_SHADER);
 #undef MAKE_SHADER
-  return make_shared<Program>(shaders);
+  auto prg = make_shared<Program>(shaders);
+  prg->setNonexistingUniformWarning(false);
+  return prg;
 };
 
 
