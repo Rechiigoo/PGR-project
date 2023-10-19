@@ -38,6 +38,8 @@ using namespace ge::gl;
 #define OPENGL_INT_LIST(f)\
   f(GL_POLYGON_MODE,GL_FILL);\
 
+#define OPENGL_FLOAT_LIST(f)\
+  f(GL_LINE_WIDTH,1.0f);\
 
 struct Backup{
 #define DECLARE(x)GLboolean v##x = GL_FALSE
@@ -45,6 +47,9 @@ struct Backup{
 #undef DECLARE
 #define DECLARE(x,y)GLint v##x = y
   OPENGL_INT_LIST(DECLARE);
+#undef DECLARE
+#define DECLARE(x,y)GLfloat v##x = y
+  OPENGL_FLOAT_LIST(DECLARE);
 #undef DECLARE
 };
 
@@ -66,6 +71,7 @@ void OpenGLStateImpl::setLastState(){
 
 
   glPolygonMode(GL_FRONT_AND_BACK,b.vGL_POLYGON_MODE);
+  glLineWidth(b.vGL_LINE_WIDTH);
 //#define SET_INT(x)GLint v##x = 0
 //  OPENGL_INT_LIST(SET_INT);
 //#undef DECLARE
@@ -80,6 +86,7 @@ void OpenGLStateImpl::push(){
   OPENGL_ENABLE_DISABLE_LIST(GET_BOOLEAN);
 #undef  GET_BOOLEAN
   glGetIntegerv(GL_POLYGON_MODE,&b.vGL_POLYGON_MODE);
+  glGetFloatv(GL_LINE_WIDTH,&b.vGL_LINE_WIDTH);
  
   backups.push_back(b);
 }

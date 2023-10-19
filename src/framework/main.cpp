@@ -140,6 +140,14 @@ void OGL::createMenuElements(){
       ImGui::EndMenu();
     }
   }
+  if(ImGui::BeginMenu("A")){
+    if(ImGui::BeginMenu("B")){
+      if(ImGui::MenuItem("C")){
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenu();
+  }
 }
 
 void OGL::createMainMenu(){
