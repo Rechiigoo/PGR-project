@@ -181,6 +181,13 @@ set(LKG_SOURCES
 add_library(LKG OBJECT ${LKG_SOURCES})
 target_link_libraries(LKG framework)
 
+set(STUDENT_SOURCES
+  src/student/project.cpp
+  )
+
+add_library(STUDENT OBJECT ${STUDENT_SOURCES})
+target_link_libraries(STUDENT framework)
+
 
 add_subdirectory(src/MISC)
 
@@ -207,6 +214,7 @@ target_link_libraries(${PROJECT_NAME}
   GMU
   ${MISC_LIBRARY}
   LKG
+  STUDENT
   ${SOLUTION_LIBRARY}
   )
 
@@ -233,4 +241,5 @@ source_group("pgr03"     FILES ${PGR03_SOURCES})
 source_group("lkg"       FILES ${LKG_SOURCES})
 source_group("pgp"       FILES ${PGP_SOURCES})
 source_group("gpu"       FILES ${GPU_SOURCES})
+source_group("student"   FILES ${STUDENT_SOURCES})
 
