@@ -1,3 +1,15 @@
+///\todo Homework 05.
+/// Reimplement compute shader.
+/// Each thread should compute mask value and store it into the buffer.
+/// Look at reference images.
+/// Hint: It is fractal image that is composed of this pattern:
+/// ▯▯     
+/// ▮▯
+///
+/// resources/images/pgp/homework05before.png
+/// resources/images/pgp/homework05After.png
+///
+
 #include<geGL/geGL.h>
 #include<glm/gtc/type_ptr.hpp>
 #include<glm/glm.hpp>
@@ -8,6 +20,7 @@
 
 #include<framework/methodRegister.hpp>
 #include<framework/defineGLSLVersion.hpp>
+#include<framework/makeProgram.hpp>
 #include<PGR/01/emptyWindow.hpp>
 
 using namespace emptyWindow;
@@ -24,19 +37,22 @@ auto                   maskSize       = glm::ivec2(128,128);
 
 
 void onInit(vars::Vars&vars){
-  auto vertexShaderSrc = defineGLSLVersion()+R".(
-  
+  auto drawSrc = R".(
+  #ifdef  VERTEX_SHADER
   void main() {
     gl_Position = vec4(-1+2*(gl_VertexID%2),-1+2*(gl_VertexID/2),0,1);
-  }).";
+  }
+  #endif//VERTEX_SHADER
  
 
-  auto fragmentShaderSrc = defineGLSLVersion()+R".(
+
+  #ifdef FRAGMENT_SHADER
   layout(binding=0,std430)buffer Mask{uint mask[];};
   
   uniform ivec2 windowSize = ivec2(512,512);
   uniform ivec2 maskSize   = ivec2(128,128);
   
+
   out vec4 fColor;
   
   void main(){
@@ -50,19 +66,14 @@ void onInit(vars::Vars&vars){
     }
   
     fColor = vec4(float(mask[maskCoord.x + maskCoord.y * maskSize.x]));
-  }).";
+  }
+  #endif//FRAGMENT_SHADER
+
+  ).";
   
-  ///\todo Homework 05.
-  /// Reimplement compute shader.
-  /// Each thread should compute mask value and store it into the buffer.
-  /// Look at reference images.
-  /// Hint: It is fractal image that is composed of this pattern:
-  ///
-  /// ▯▯     
-  /// ▮▯
-  ///
-  std::string static const computeShaderSrc = defineGLSLVersion()+
+  auto computeSrc =
   R".(
+  #ifdef  COMPUTE_SHADER
   layout(local_size_x=16,local_size_y=16)in;
   
   layout(binding=0,std430)buffer Mask{uint mask[];};
@@ -73,20 +84,17 @@ void onInit(vars::Vars&vars){
     uvec2 coord = uvec2(gl_GlobalInvocationID.xy);
   
     mask[coord.x + coord.y * maskSize.x] = uint(coord.x == coord.y);
-  }).";
+  }
+  #endif//COMPUTE_SHADER
+  ).";
 
   //create shader program
-  auto vs = make_shared<Shader>(GL_VERTEX_SHADER  ,vertexShaderSrc);
-  auto fs = make_shared<Shader>(GL_FRAGMENT_SHADER,fragmentShaderSrc);
-  drawProgram = make_shared<Program>(vs, fs);
+  drawProgram = makeProgram(drawSrc);
   vao         = make_shared<VertexArray>();
 
-  auto cs = make_shared<Shader>(GL_COMPUTE_SHADER,computeShaderSrc);
-  computeProgram = make_shared<Program>(cs);
+  computeProgram = makeProgram(computeSrc);
 
   maskBuffer = make_shared<Buffer>(maskSize.x*maskSize.y*sizeof(int32_t));
-
-
 
   glClearColor(0,0,0,1);
 }

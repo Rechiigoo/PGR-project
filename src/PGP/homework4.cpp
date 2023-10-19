@@ -1,17 +1,23 @@
-//Use atomic instruction inside fragment shader and
-//cound the number of rasterized fragments.
-//Write the number of rasterized fragments of this program
-//into nofRasterizedSamples variable inside onDraw
-//
-//You may have to create and clear buffer
-//and use atomic instruction for addition
-//
-//Help:
-//glCreateBuffers
-//glClearNamedBufferData
-//glBindBufferBase
-//glGetNamedBufferSubData
-//layout(binding=0,std430)buffer Counter{uint counter;};
+///Use atomic instruction inside fragment shader and
+///count the number of rasterized fragments.
+///Write the number of rasterized fragments of this program
+///into nofRasterizedSamples variable inside onDraw function.
+///
+///You may have to create and clear buffer
+///and use atomic instruction for addition.
+///
+///Help:
+///glCreateBuffers
+///glClearNamedBufferData
+///glBindBufferBase
+///glGetNamedBufferSubData
+///layout(binding=0,std430)buffer Counter{uint counter;};
+///atomicAdd
+///
+///
+/// resources/images/pgp/homework04before.png
+/// just compute the counter online...
+///
 
 #include<geGL/geGL.h>
 #include<glm/glm.hpp>

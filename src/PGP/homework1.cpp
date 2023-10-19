@@ -15,6 +15,9 @@
 /// 
 /// submit homework1.cpp
 ///
+/// resources/images/pgp/homework01before.png
+/// resources/images/pgp/homework01after.png
+///
 ///
 ///
 /// b) Vulkan (harder)
@@ -38,7 +41,7 @@
 #include<imguiVars/addVarsLimits.h>
 
 #include<framework/methodRegister.hpp>
-#include<framework/defineGLSLVersion.hpp>
+#include<framework/makeProgram.hpp>
 #include<PGR/01/emptyWindow.hpp>
 
 using namespace emptyWindow;
@@ -54,8 +57,9 @@ GLuint objectDataBuffer;
 GLuint vao;
 
 void onInit(vars::Vars&vars){
-  auto vertexShaderSrc = defineGLSLVersion()+R".(
+  auto src = R".(
   
+  #ifdef  VERTEX_SHADER
   struct ObjectData{
     vec2 position;
     vec2 size    ;
@@ -73,21 +77,24 @@ void onInit(vars::Vars&vars){
     ObjectData objectData = objects[drawId];
     vColor = objectData.color;
     gl_Position = vec4(position*objectData.size + objectData.position,1,1);
-  }).";
+  }
+  #endif//VERTEX_SHADER
 
 
-  auto fragmentShaderSrc = defineGLSLVersion()+R".(
+
+  #ifdef FRAGMENT_SHADER
   in vec4 vColor;
   out vec4 fColor;
   
   void main(){
     fColor=vColor;
-  }).";
+  }
+  #endif//FRAGMENT_SHADER
+
+  ).";
 
   //create shader program
-  auto vs = make_shared<Shader>(GL_VERTEX_SHADER  ,vertexShaderSrc);
-  auto fs = make_shared<Shader>(GL_FRAGMENT_SHADER,fragmentShaderSrc);
-  program = make_shared<Program>(vs, fs);
+  program = makeProgram(src);
 
   //buffer data
   std::vector<float>vertices = {

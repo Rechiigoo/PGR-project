@@ -1,5 +1,8 @@
 ///\todo Homework 3.
 /// Transfrom the cube to sphere using tessellation.
+///
+/// resources/images/pgp/homework03before.png
+/// resources/images/pgp/homework03after.png
 
 #include<geGL/geGL.h>
 #include<glm/glm.hpp>

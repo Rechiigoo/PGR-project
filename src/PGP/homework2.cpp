@@ -7,6 +7,9 @@
 ///
 ///Vulkan version is not necessary - you are only working with shaders.
 ///But if you have to...
+///
+/// resources/images/pgp/homework02before.png
+/// resources/images/pgp/homework02after.png
 
 #include<geGL/geGL.h>
 #include<glm/glm.hpp>
