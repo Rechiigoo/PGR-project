@@ -97,6 +97,7 @@ endif()
 set(PGR01_SOURCES
   src/PGR/01/emptyWindow.hpp
   src/PGR/01/emptyWindow.cpp
+  src/PGR/01/oglFunc.cpp
   src/PGR/01/compileShaders.cpp
   src/PGR/01/compileShaders.hpp
   src/PGR/01/shaders.cpp
