@@ -199,6 +199,7 @@ void OGL::mouseMove(SDL_Event const& event){
 
 void OGL::deinit(){
   saveMethod(MethodRegister::get().manager.getCurrentMethod());
+  MethodRegister::get().manager.onQuit(vars);
 }
 
 int main(int argc,char*argv[]){

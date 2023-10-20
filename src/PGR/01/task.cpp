@@ -9,6 +9,10 @@
 using namespace ge::gl;
 
 namespace pgr_task01{
+void(*a)();
+
+std::shared_ptr<VertexArray>vao;
+std::shared_ptr<Buffer>vbo;
 
 void onInit(vars::Vars&){
   glClearColor(0.1f,0.2f,0.2f,1.0f);
@@ -18,8 +22,9 @@ void onDraw(vars::Vars&vars){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 }
 
-void onQuit(vars::Vars&){
 
+void onQuit(vars::Vars&vars){
+  vars.erase("method");
 }
 
 void onResize(vars::Vars&vars){
