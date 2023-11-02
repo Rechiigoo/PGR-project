@@ -139,6 +139,7 @@ set(PGR03_SOURCES
   src/PGR/03/twoTriangles.hpp
   src/PGR/03/twoTriangles.cpp
   src/PGR/03/bezierSurf.cpp
+  src/PGR/03/stencil.cpp
   )
 
 set(PGR_EXAMPLE_SOURCES
