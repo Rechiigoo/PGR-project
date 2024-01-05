@@ -108,154 +108,157 @@ endif()
 set_property(TARGET ${PROJECT_NAME} PROPERTY INTERFACE_${PROJECT_NAME}_MAJOR_VERSION ${PROJECT_VERSION_MAJOR})
 set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY COMPATIBLE_INTERFACE_STRING ${PROJECT_NAME}_MAJOR_VERSION)
 
-#install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
-#  LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#  ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#  RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
-#  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-#  )
-#
-##install header files
-#if(NOT ${HeaderOnly})
-#  install(
-#    FILES       ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME_LOWER}_export.h
-#    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-#    COMPONENT   Devel
-#    )
-#endif()
-#
-#install(
-#  FILES       ${PUBLIC_INCLUDES} ${INTERFACE_INCLUDES}
-#  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-#  COMPONENT   Devel
-#  )
-#
-##create *ConfigVersion.cmake config file
-#include(CMakePackageConfigHelpers)
-#set(ConfigDir ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
-#write_basic_package_version_file(
-#  ${ConfigDir}/${PROJECT_NAME}ConfigVersion.cmake
-#  VERSION ${${PROJECT_NAME}_VERSION}
-#  COMPATIBILITY SameMajorVersion
-#  )
-#
-##create *Targets.cmake config file
-#export(EXPORT ${PROJECT_NAME}Targets
-#  FILE      ${ConfigDir}/${PROJECT_NAME}Targets.cmake
-#  NAMESPACE ${PROJECT_NAME}::
-#  )
-#
-##create content of *Config.cmake config file
-#string(CONCAT ConfigContent
-#  "include(CMakeFindDependencyMacro)\n"
-#  )
-#
-#foreach(lib ${ExternPublicLibraries} ${ExternInterfaceLibraries})
-#  list(GET lib 0 libName)
-#  list(LENGTH lib len)
-#  if(${len} LESS 2)
-#    string(CONCAT ConfigContent
-#      ${ConfigContent}
-#      "find_dependency(" ${libName} ")\n"
-#      )
-#  else()
-#    list(GET lib 1 libVersion)
-#    #try to match the version
-#    string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*$" matchedVersion ${libVersion})
-#    if("${matchedVersion}" STREQUAL "")
-#      string(CONCAT ConfigContent
-#        ${ConfigContent}
-#        "find_dependency(" ${libName} ")\n"
-#        )
-#    else()
-#      string(CONCAT ConfigContent
-#        ${ConfigContent}
-#        "find_dependency(" ${libName} " " ${libVersion} ")\n"
-#        )
-#    endif()
-#  endif()
-#endforeach()
-#
-#
-#string(CONCAT ConfigContent
-#  ${ConfigContent}
-#  "include($" "{CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake)\n"
-#  )
-#
-##create *Config.cmake config file
-#file(WRITE ${ConfigDir}/${PROJECT_NAME}Config.cmake ${ConfigContent})
-#
-##install configs
-#set(ConfigPackageLocation lib/cmake/${PROJECT_NAME})
-#install(
-#  FILES
-#  ${ConfigDir}/${PROJECT_NAME}Config.cmake
-#  ${ConfigDir}/${PROJECT_NAME}ConfigVersion.cmake
-#  DESTINATION ${ConfigPackageLocation}
-#  COMPONENT   Devel
-#  )
-#
-#install(EXPORT ${PROJECT_NAME}Targets
-#  FILE        ${PROJECT_NAME}Targets.cmake
-#  NAMESPACE   ${PROJECT_NAME}::
-#  DESTINATION ${ConfigPackageLocation}
-#  )
-#
-#if((NOT "${PublicIncludeVariables}" STREQUAL "") OR (NOT "${InterfaceIncludeVariables}" STREQUAL ""))
-#
-#  string(CONCAT FIX
-#    "\n"
-#    "# We need to fix libraries that do not provide configs but variables (like GLEW_INCLUDE_DIR GLEW_LIBRARY_RELEASE)\n"
-#    "# We do it by adding these variables to INTERFACE_INCLUDE_DIRECTORIES and INTERFACE_LINK_LIBRARIES\n"
-#    "get_target_property(includes " ${PROJECT_NAME} "::" ${PROJECT_NAME} " INTERFACE_INCLUDE_DIRECTORIES)\n"
-#    "get_target_property(libs " ${PROJECT_NAME} "::" ${PROJECT_NAME} " INTERFACE_LINK_LIBRARIES)\n"
-#    )
-#  
-#  
-#  foreach(inc ${PublicIncludeVariables})
-#    string(CONCAT FIX "${FIX}"
-#      "string(CONCAT includes \\\"\\$" "{includes}\\\" \\\"\;\\$" "{${inc}}\\\")\n"
-#      )
-#  endforeach()
-#  
-#  foreach(inc ${InterfaceIncludeVariables})
-#    string(CONCAT FIX "${FIX}"
-#      "string(CONCAT includes \\\"\\$" "{includes}\\\" \\\"\;\\$" "{${inc}}\\\")\n"
-#      )
-#  endforeach()
-#  
-#  foreach(lib ${PublicReleaseLibraryVariables})
-#    string(CONCAT FIX "${FIX}"
-#      "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Release>:\;\\$" "{${lib}}>\\\")\n"
-#      )
-#  endforeach()
-#  
-#  foreach(lib ${InterfaceReleaseLibraryVariables})
-#    string(CONCAT FIX "${FIX}"
-#      "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Release>:\;\\$" "{${lib}}>\\\")\n"
-#      )
-#  endforeach()
-#  
-#  foreach(lib ${PublicDebugLibraryVariables})
-#    string(CONCAT FIX "${FIX}"
-#      "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Debug>:\;\\$" "{${lib}}>\\\")\n"
-#      )
-#  endforeach()
-#  
-#  foreach(lib ${InterfaceDebugLibraryVariables})
-#    string(CONCAT FIX "${FIX}"
-#      "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Debug>:\;\\$" "{${lib}}>\\\")\n"
-#      )
-#  endforeach()
-#  
-#  string(CONCAT FIX "${FIX}"
-#    "set_target_properties(" ${PROJECT_NAME} "::" ${PROJECT_NAME} " PROPERTIES INTERFACE_INCLUDE_DIRECTORIES \\\"\\$" "{includes}\\\" INTERFACE_LINK_LIBRARIES \\\"\\$" "{libs}\\\")\n"
-#    )
-#  
-#  string(CONCAT installCode 
-#    "file(APPEND ${CMAKE_INSTALL_PREFIX}/${ConfigPackageLocation}/${PROJECT_NAME}Targets.cmake \"${FIX}\")\n"
-#    )
-#  
-#  install(CODE ${installCode})
-#
-#endif()
+get_directory_property(hasParent PARENT_DIRECTORY)
+if(NOT hasParent)
+  install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
+    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+  
+  #install header files
+  if(NOT ${HeaderOnly})
+    install(
+      FILES       ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME_LOWER}_export.h
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+      COMPONENT   Devel
+      )
+  endif()
+  
+  install(
+    FILES       ${PUBLIC_INCLUDES} ${INTERFACE_INCLUDES}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+    COMPONENT   Devel
+    )
+  
+  #create *ConfigVersion.cmake config file
+  include(CMakePackageConfigHelpers)
+  set(ConfigDir ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME})
+  write_basic_package_version_file(
+    ${ConfigDir}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${${PROJECT_NAME}_VERSION}
+    COMPATIBILITY SameMajorVersion
+    )
+  
+  #create *Targets.cmake config file
+  export(EXPORT ${PROJECT_NAME}Targets
+    FILE      ${ConfigDir}/${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    )
+  
+  #create content of *Config.cmake config file
+  string(CONCAT ConfigContent
+    "include(CMakeFindDependencyMacro)\n"
+    )
+  
+  foreach(lib ${ExternPublicLibraries} ${ExternInterfaceLibraries})
+    list(GET lib 0 libName)
+    list(LENGTH lib len)
+    if(${len} LESS 2)
+      string(CONCAT ConfigContent
+        ${ConfigContent}
+        "find_dependency(" ${libName} ")\n"
+        )
+    else()
+      list(GET lib 1 libVersion)
+      #try to match the version
+      string(REGEX MATCH "^[0-9]+(\\.[0-9]+)*$" matchedVersion ${libVersion})
+      if("${matchedVersion}" STREQUAL "")
+        string(CONCAT ConfigContent
+          ${ConfigContent}
+          "find_dependency(" ${libName} ")\n"
+          )
+      else()
+        string(CONCAT ConfigContent
+          ${ConfigContent}
+          "find_dependency(" ${libName} " " ${libVersion} ")\n"
+          )
+      endif()
+    endif()
+  endforeach()
+  
+  
+  string(CONCAT ConfigContent
+    ${ConfigContent}
+    "include($" "{CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}Targets.cmake)\n"
+    )
+  
+  #create *Config.cmake config file
+  file(WRITE ${ConfigDir}/${PROJECT_NAME}Config.cmake ${ConfigContent})
+  
+  #install configs
+  set(ConfigPackageLocation lib/cmake/${PROJECT_NAME})
+  install(
+    FILES
+    ${ConfigDir}/${PROJECT_NAME}Config.cmake
+    ${ConfigDir}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${ConfigPackageLocation}
+    COMPONENT   Devel
+    )
+  
+  install(EXPORT ${PROJECT_NAME}Targets
+    FILE        ${PROJECT_NAME}Targets.cmake
+    NAMESPACE   ${PROJECT_NAME}::
+    DESTINATION ${ConfigPackageLocation}
+    )
+  
+  if((NOT "${PublicIncludeVariables}" STREQUAL "") OR (NOT "${InterfaceIncludeVariables}" STREQUAL ""))
+  
+    string(CONCAT FIX
+      "\n"
+      "# We need to fix libraries that do not provide configs but variables (like GLEW_INCLUDE_DIR GLEW_LIBRARY_RELEASE)\n"
+      "# We do it by adding these variables to INTERFACE_INCLUDE_DIRECTORIES and INTERFACE_LINK_LIBRARIES\n"
+      "get_target_property(includes " ${PROJECT_NAME} "::" ${PROJECT_NAME} " INTERFACE_INCLUDE_DIRECTORIES)\n"
+      "get_target_property(libs " ${PROJECT_NAME} "::" ${PROJECT_NAME} " INTERFACE_LINK_LIBRARIES)\n"
+      )
+    
+    
+    foreach(inc ${PublicIncludeVariables})
+      string(CONCAT FIX "${FIX}"
+        "string(CONCAT includes \\\"\\$" "{includes}\\\" \\\"\;\\$" "{${inc}}\\\")\n"
+        )
+    endforeach()
+    
+    foreach(inc ${InterfaceIncludeVariables})
+      string(CONCAT FIX "${FIX}"
+        "string(CONCAT includes \\\"\\$" "{includes}\\\" \\\"\;\\$" "{${inc}}\\\")\n"
+        )
+    endforeach()
+    
+    foreach(lib ${PublicReleaseLibraryVariables})
+      string(CONCAT FIX "${FIX}"
+        "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Release>:\;\\$" "{${lib}}>\\\")\n"
+        )
+    endforeach()
+    
+    foreach(lib ${InterfaceReleaseLibraryVariables})
+      string(CONCAT FIX "${FIX}"
+        "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Release>:\;\\$" "{${lib}}>\\\")\n"
+        )
+    endforeach()
+    
+    foreach(lib ${PublicDebugLibraryVariables})
+      string(CONCAT FIX "${FIX}"
+        "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Debug>:\;\\$" "{${lib}}>\\\")\n"
+        )
+    endforeach()
+    
+    foreach(lib ${InterfaceDebugLibraryVariables})
+      string(CONCAT FIX "${FIX}"
+        "string(CONCAT libs \\\"\\$" "{libs}\\\" \\\"\\$<\\$<CONFIG:Debug>:\;\\$" "{${lib}}>\\\")\n"
+        )
+    endforeach()
+    
+    string(CONCAT FIX "${FIX}"
+      "set_target_properties(" ${PROJECT_NAME} "::" ${PROJECT_NAME} " PROPERTIES INTERFACE_INCLUDE_DIRECTORIES \\\"\\$" "{includes}\\\" INTERFACE_LINK_LIBRARIES \\\"\\$" "{libs}\\\")\n"
+      )
+    
+    string(CONCAT installCode 
+      "file(APPEND ${CMAKE_INSTALL_PREFIX}/${ConfigPackageLocation}/${PROJECT_NAME}Targets.cmake \"${FIX}\")\n"
+      )
+    
+    install(CODE ${installCode})
+  
+  endif()
+endif()
