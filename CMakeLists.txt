@@ -164,11 +164,11 @@ target_link_libraries(GMU framework)
 set(PGP_SOURCES
   src/PGP/lect/compute.hpp
   src/PGP/lect/compute.cpp
-  src/PGP/homework1.cpp
-  src/PGP/homework2.cpp
-  src/PGP/homework3.cpp
-  src/PGP/homework4.cpp
-  src/PGP/homework5.cpp
+  src/PGP/homeworks/homework1.cpp
+  src/PGP/homeworks/homework2.cpp
+  src/PGP/homeworks/homework3.cpp
+  src/PGP/homeworks/homework4.cpp
+  src/PGP/homeworks/homework5.cpp
   )
 
 add_library(PGP OBJECT ${PGP_SOURCES})

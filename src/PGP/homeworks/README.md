@@ -62,6 +62,6 @@ atomicAdd
 Reimplement compute shader.
 Each thread should compute mask value and store it into the buffer.
 Look at reference images.
-Hint: It is fractal image that is composed of this pattern:
-▯▯     
-▮▯
+Hint: It is fractal image that is composed of this pattern:<br>
+▯▯<br>
+▮▯<br>
