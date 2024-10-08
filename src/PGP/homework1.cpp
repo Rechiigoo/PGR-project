@@ -3,7 +3,7 @@
 /// You can write your homework in (a) OpenGL or (b) Vulkan (harder).
 /// 
 /// a) OpenGL (standard) homework1:
-/// Use indirect call to recreate other draw calls in this file.
+/// Use indirect call and replace the other draw calls in this file.
 /// Use single glMultiDrawArraysIndirect call to render everything.
 ///
 /// You have to create draw indirect buffer that contains correct values (draw commands).
