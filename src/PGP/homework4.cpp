@@ -16,7 +16,7 @@
 ///
 ///
 /// resources/images/pgp/homework04before.png
-/// just compute the counter online...
+/// just compute the counter at runtime...
 ///
 
 #include<geGL/geGL.h>
