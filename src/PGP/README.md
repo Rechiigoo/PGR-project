@@ -1,7 +1,7 @@
 # PGP homeworks
 
 ## homework01.cpp - instanced indirected rendering
-<img style="float:left"  src="https://github.com/dormon/MealyMachine/blob/master/img/example1.svg" width="720px">
+<img style="float:left"  src="https://git.fit.vutbr.cz/imilet/FitGraphics/src/branch/master/resources/images/pgp/01/before.png" width="512px">
 
 ## homework02.cpp - geometry shaders
 
