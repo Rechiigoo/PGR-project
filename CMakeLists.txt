@@ -125,6 +125,7 @@ set(PGR02_SOURCES
   src/PGR/02/texture.hpp
   src/PGR/02/texture.cpp
   src/PGR/02/blending.cpp
+  src/PGR/02/srgb.cpp
   src/PGR/02/model.hpp
   src/PGR/02/model.cpp
   )
