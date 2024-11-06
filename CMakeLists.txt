@@ -119,6 +119,7 @@ set(PGR01_SOURCES
   src/PGR/01/geometryShaders.cpp
   src/PGR/01/gsFrostBunny.cpp
   src/PGR/01/gsWireBunny.cpp
+  src/PGR/01/tsCircleBunny.cpp
   )
 
 set(PGR02_SOURCES
