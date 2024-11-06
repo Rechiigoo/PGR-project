@@ -117,6 +117,7 @@ set(PGR01_SOURCES
   src/PGR/01/freelookCamera.cpp
   src/PGR/01/geometryShaders.hpp
   src/PGR/01/geometryShaders.cpp
+  src/PGR/01/gsFrostBunny.cpp
   )
 
 set(PGR02_SOURCES
