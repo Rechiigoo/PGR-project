@@ -244,7 +244,7 @@ EntryPoint main = [](){
   clbs.onInit        =              onInit       ;
   clbs.onQuit        =              onQuit       ;
   clbs.onResize      = emptyWindow::onResize     ;
-  MethodRegister::get().manager.registerMethod("misc.tessellationLevels",clbs);
+  MethodRegister::get().manager.registerMethod("ts.tessellationLevels",clbs);
 };
 }
 

@@ -10,7 +10,7 @@
 #include<PGR/03/phong.hpp>
 #include<framework/bunny.hpp>
 
-namespace gsWireBunny{
+namespace gsFrozenBunny{
 
 using namespace ge::gl;
 
@@ -18,53 +18,67 @@ std::string vsSrc = R".(
 out vec4 vColor;
 
 uniform float iTime = 0;
-uniform mat4 proj = mat4(1.f);
-uniform mat4 view = mat4(1.f);
-uniform mat4 model = mat4(1.f);
 
 layout(location=0)in vec3 position;
 layout(location=1)in vec3 normal  ;
 
 void main(){
   vColor = vec4(normal,1);
-  gl_Position = proj*view*model*vec4(position,1);
+  gl_Position = vec4(position,1);
 }
+
 ).";
 
 std::string  gsSrc = R".(
 layout(triangles)in;
-layout(line_strip,max_vertices=4)out;
+layout(triangle_strip,max_vertices=5)out;
 
 in vec4 vColor[];
 out vec4 gColor;
 
+uniform mat4 proj = mat4(1.f);
+uniform mat4 view = mat4(1.f);
+uniform mat4 model = mat4(1.f);
+
 void main(){
-  vec4 a = (gl_in[0].gl_Position + gl_in[1].gl_Position)/2.f;
-  vec4 b = (gl_in[1].gl_Position + gl_in[2].gl_Position)/2.f;
-  vec4 c = (gl_in[2].gl_Position + gl_in[0].gl_Position)/2.f;
+  mat4 M = proj*view*model;
 
-  vec4 ac = (vColor[0] + vColor[1])/2.f;
-  vec4 bc = (vColor[1] + vColor[2])/2.f;
-  vec4 cc = (vColor[2] + vColor[0])/2.f;
+  vec4 a = gl_in[1].gl_Position - gl_in[0].gl_Position;
+  vec4 b = gl_in[2].gl_Position - gl_in[1].gl_Position;
+  vec4 c = gl_in[0].gl_Position - gl_in[2].gl_Position;
 
-  gl_Position = a;
-  gColor = ac;
+  vec3 n = normalize(cross(a.xyz,b.xyz));
+  vec3 C = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz)/3.f;
+  float l = (length(a.xyz) + length(b.xyz) + length(c.xyz))/3.f;
+
+  C += n*l;
+
+
+  gl_Position = M*gl_in[0].gl_Position;
+  gColor = vColor[0];
   EmitVertex();
 
-  gl_Position = b;
-  gColor = bc;
+  gl_Position = M*gl_in[1].gl_Position;
+  gColor = vColor[1];
   EmitVertex();
 
-  gl_Position = c;
-  gColor = cc;
+  gl_Position = M*vec4(C,1);
+  gColor = vec4(1);
   EmitVertex();
 
-  gl_Position = a;
-  gColor = ac;
+  gl_Position = M*gl_in[2].gl_Position;
+  gColor = vColor[2];
   EmitVertex();
+
+
+  gl_Position = M*gl_in[0].gl_Position;
+  gColor = vColor[0];
+  EmitVertex();
+
 
   EndPrimitive();
 }
+
 ).";
 
 std::string const fsSrc = R".(
@@ -194,7 +208,7 @@ EntryPoint main = [](){
   clbs.onQuit        =              onQuit       ;
   clbs.onResize      = emptyWindow::onResize     ;
   clbs.onMouseMotion = model      ::onMouseMotion;
-  MethodRegister::get().manager.registerMethod("pgr01.gsWireBunny",clbs);
+  MethodRegister::get().manager.registerMethod("gs.frozenBunny",clbs);
 };
 
 }

@@ -209,7 +209,7 @@ EntryPoint main = [](){
   clbs.onQuit        =              onQuit       ;
   clbs.onResize      = emptyWindow::onResize     ;
   clbs.onMouseMotion = model      ::onMouseMotion;
-  MethodRegister::get().manager.registerMethod("pgr01.tsCircleBunny",clbs);
+  MethodRegister::get().manager.registerMethod("ts.circleBunny",clbs);
 };
 
 }

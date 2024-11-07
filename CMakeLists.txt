@@ -115,11 +115,6 @@ set(PGR01_SOURCES
   src/PGR/01/task.cpp
   src/PGR/01/freelookCamera.hpp
   src/PGR/01/freelookCamera.cpp
-  src/PGR/01/geometryShaders.hpp
-  src/PGR/01/geometryShaders.cpp
-  src/PGR/01/gsFrostBunny.cpp
-  src/PGR/01/gsWireBunny.cpp
-  src/PGR/01/tsCircleBunny.cpp
   )
 
 set(PGR02_SOURCES
@@ -144,7 +139,6 @@ set(PGR03_SOURCES
   src/PGR/03/shadowedModel.cpp
   src/PGR/03/twoTriangles.hpp
   src/PGR/03/twoTriangles.cpp
-  src/PGR/03/bezierSurf.cpp
   src/PGR/03/stencil.cpp
   src/PGR/03/shadowVolume.cpp
   )
@@ -191,6 +185,26 @@ set(LKG_SOURCES
 add_library(LKG OBJECT ${LKG_SOURCES})
 target_link_libraries(LKG framework)
 
+set(GS_SOURCES
+  src/GS/geometryShaders.cpp
+  src/GS/geometryShaders.hpp
+  src/GS/gsWireBunny.cpp
+  src/GS/gsFrostBunny.cpp
+  )
+
+add_library(GS OBJECT ${GS_SOURCES})
+target_link_libraries(GS framework)
+
+set(TS_SOURCES
+  src/TS/tessellationLevels.cpp
+  src/TS/bezierSurf.cpp
+  src/TS/tsCircleBunny.cpp
+  )
+
+add_library(TS OBJECT ${TS_SOURCES})
+target_link_libraries(TS framework)
+
+
 set(STUDENT_SOURCES
   src/student/project.cpp
   )
@@ -222,6 +236,8 @@ target_link_libraries(${PROJECT_NAME}
   PGR
   PGP
   GMU
+  GS
+  TS
   ${MISC_LIBRARY}
   LKG
   STUDENT

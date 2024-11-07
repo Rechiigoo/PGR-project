@@ -89,7 +89,7 @@ EntryPoint main = [](){
   clbs.onInit   = onInit  ;
   clbs.onQuit   = onQuit  ;
   clbs.onResize = emptyWindow::onResize;
-  MethodRegister::get().manager.registerMethod("pgr01.geometryShaders",clbs);
+  MethodRegister::get().manager.registerMethod("gs.geometryShaders",clbs);
 };
 
 }

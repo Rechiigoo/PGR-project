@@ -6,7 +6,6 @@ PROJECT(misc)
 set(MISC_LIBRARY ${PROJECT_NAME} PARENT_SCOPE)
 set(MISC_SOURCES
   rasterizationOrder.cpp
-  tessellationLevels.cpp
   memoryBandwidth.cpp
   )
 

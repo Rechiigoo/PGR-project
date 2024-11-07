@@ -191,7 +191,7 @@ EntryPoint main = [](){
   clbs.onResize      = emptyWindow::onResize     ;
   clbs.onKeyDown     =              onKeyDown    ;
   clbs.onMouseMotion =              onMouseMotion;
-  MethodRegister::get().manager.registerMethod("pgr03.bezierSurf",clbs);
+  MethodRegister::get().manager.registerMethod("ts.bezierSurf",clbs);
 };
 
 }
