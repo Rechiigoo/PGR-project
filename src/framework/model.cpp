@@ -4,7 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <framework/model.hpp>
-#include <libs/tiny_gltf/tiny_gltf.h>
+#include <tiny_gltf.h>
 
 namespace tests{
 void printModel(Model const&model);

@@ -14,7 +14,7 @@
 #include<glm/gtc/quaternion.hpp>
 #include<glm/gtx/quaternion.hpp>
 
-#include<libs/tiny_gltf/tiny_gltf.h>
+#include<tiny_gltf.h>
 
 
 using namespace ge::gl;

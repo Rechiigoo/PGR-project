@@ -11,7 +11,7 @@
 #include<PGR/01/emptyWindow.hpp>
 #include<PGR/01/compileShaders.hpp>
 
-#include<libs/stb_image/stb_image.h>
+#include<stb_image.h>
 
 using namespace ge::gl;
 using namespace compileShaders;
