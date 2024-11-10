@@ -2,14 +2,13 @@ cmake_minimum_required(VERSION 3.12.0)
 
 project(FitGraphics)
 
-set(CMAKE_CXX_VISIBILITY_PRESET default)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1 ) 
+set(CMAKE_CXX_VISIBILITY_PRESET   default)
+set(CMAKE_CXX_STANDARD            17     )
+set(CMAKE_C_STANDARD              99     )
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1      ) 
 
+# visual studio startup project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
-
-include(CMakeUtils.cmake)
 
 add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE libs/glm-0.9.9.8)
@@ -46,6 +45,8 @@ add_subdirectory(src/PGP)
 add_subdirectory(src/student)
 add_subdirectory(src/PGR)
 
+
+#solution files / files that should not be visible to students
 set(SOLUTION_DIR "" CACHE STRING "Directory containing solution files")
 
 if(NOT ${SOLUTION_DIR} EQUAL "")

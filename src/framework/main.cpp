@@ -47,7 +47,7 @@ std::string loadMethod(){
 
   std::ifstream file (name);
   if(!file.is_open()){
-    std::cerr << "cannot open camera file: " << name << std::endl;
+    std::cerr << "cannot open file containing the last method: " << name << std::endl;
     return "";
   }
   std::string res;
@@ -60,7 +60,7 @@ void saveMethod(std::string const&method){
   std::string name = "storedMethod.txt";
   std::ofstream file (name);
   if(!file.is_open()){
-    std::cerr << "cannot open camera file: " << name << std::endl;
+    std::cerr << "cannot open file containing the last method: " << name << std::endl;
     return;
   }
   file << method;
