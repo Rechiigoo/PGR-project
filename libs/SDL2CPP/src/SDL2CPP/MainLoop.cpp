@@ -7,9 +7,9 @@ using namespace sdl2cpp;
 using namespace std;
 
 void sdl2cpp::initSDL2(){
-  if(SDL_WasInit(SDL_INIT_EVERYTHING)&SDL_INIT_EVERYTHING)
+  if(SDL_WasInit(SDL_INIT_VIDEO)&SDL_INIT_VIDEO)
     return;
-  if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+  if (SDL_Init(SDL_INIT_VIDEO) < 0)
     throw ex::Exception(SDL_GetError());
 }
 

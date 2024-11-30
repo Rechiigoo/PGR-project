@@ -15,7 +15,7 @@ target_include_directories(glm INTERFACE libs/glm-0.9.9.8)
 
 option(SDL_SHARED "" OFF)
 option(SDL_STATIC "" ON)
-add_subdirectory(libs/SDL-release-2.24.1)
+add_subdirectory(libs/SDL-release-2.30.9)
 
 add_subdirectory(libs/MealyMachine)
 add_subdirectory(libs/TxtUtils)
