@@ -10,6 +10,7 @@ set(SOURCES
   lf_blend.cpp
   spherical_harmonic_visualizer.cpp
   spherical_harmonic_visualizer.hpp
+  renderHoloFocus.cpp
   )
 
 add_library(${PROJECT_NAME} OBJECT ${SOURCES})
