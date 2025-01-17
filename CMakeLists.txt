@@ -49,6 +49,10 @@ add_subdirectory(src/PGR)
 #solution files / files that should not be visible to students
 set(SOLUTION_DIR "" CACHE STRING "Directory containing solution files")
 
+if(IS_DIRECTORY "${PROJECT_SOURCE_DIR}/../FitGraphics_solution")
+  set(SOLUTION_DIR "${PROJECT_SOURCE_DIR}/../FitGraphics_solution")
+endif()
+
 if(NOT ${SOLUTION_DIR} EQUAL "")
   add_subdirectory(${SOLUTION_DIR} SOLUTION)
 endif()
