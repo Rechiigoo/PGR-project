@@ -7,8 +7,11 @@ So far, it can be used as base for student project
 ## Compilation
 On Linux:
 ```
-$ git clone https://git.fit.vutbr.cz/imilet/ComputerGraphics.git
-$ cd ComputerGraphics
+$ git clone https://git.fit.vutbr.cz/imilet/FitGraphics.git
+$ or
+$ git clone git@git.fit.vutbr.cz:imilet/FitGraphics.git
+$
+$ cd FitGraphics
 $ mkdir build
 $ cd build
 $ cmake ..
