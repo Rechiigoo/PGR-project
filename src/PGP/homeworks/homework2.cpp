@@ -31,7 +31,7 @@ namespace pgp::homework2{
 shared_ptr<Program    >program;
 shared_ptr<VertexArray>vao    ;
 
-void onInit(vars::Vars&vars){
+void onInit(vars::Vars&vars){ //do NOT touch vertex shader
   auto src = R".(
   #ifdef  VERTEX_SHADER
   void main() {
@@ -51,21 +51,61 @@ void onInit(vars::Vars&vars){
   /// every point should be replaced with Czech Republic flag.
 
   layout(points)in;
-  layout(points,max_vertices=1)out;
+  layout(triangle_strip,max_vertices=12)out; //triangle strip for czech flag?
+
+  out vec3 color; //color to fragment shader
   
   void main(){
-    gl_Position = gl_in[0].gl_Position;
+    vec4 center_pos = gl_in[0].gl_Position;
+    float size = 0.1;
+    float aspec_ratio = 1.5;
+
+    //corners of flag
+    vec4 topl = center_pos + vec4(-size*aspec_ratio, size, 0, 0);
+    vec4 topr = center_pos + vec4(size*aspec_ratio, size, 0, 0);
+    vec4 botl = center_pos + vec4(-size*aspec_ratio, -size, 0, 0);
+    vec4 botr = center_pos + vec4(size*aspec_ratio, -size, 0, 0);
+
+    //white half
+    color = vec3(1.0);
+    gl_Position = topl; EmitVertex();
+    gl_Position = topr; EmitVertex();
+    gl_Position = center_pos + vec4(-size * aspec_ratio,0,0,0);
+    EmitVertex();
+    gl_Position = center_pos + vec4(size * aspec_ratio,0,0,0);
     EmitVertex();
     EndPrimitive();
+
+    //red half
+    color = vec3(1.0, 0.0, 0.0);
+    gl_Position = center_pos + vec4(-size * aspec_ratio,0,0,0);
+    EmitVertex();
+    gl_Position = center_pos + vec4(size * aspec_ratio,0,0,0);
+    EmitVertex();
+    gl_Position = botl; EmitVertex();
+    gl_Position = botr; EmitVertex();
+    EndPrimitive();
+
+    //blue triangle
+    color = vec3(0.0, 0.0, 1.0);
+    gl_Position = topl + vec4(0,0,0.001,0);
+    EmitVertex();
+    gl_Position = center_pos + vec4(0,0,0.001,0);
+    EmitVertex();
+    gl_Position = botl + vec4(0,0,0.001,0);
+    EmitVertex();
+    EndPrimitive();
+    
   }
   #endif//GEOMETRY_SHADER
 
 
   #ifdef FRAGMENT_SHADER
+  in vec3 color;
   out vec4 fColor;
   
   void main(){
-    fColor = vec4(1,1,1,1);
+    fColor = vec4(color,1.0);
   }
   #endif//FRAGMENT_SHADER
   ).";
@@ -81,7 +121,7 @@ void onDraw(vars::Vars&vars){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   program->use();
   vao->bind();
-  glDrawArrays(GL_POINTS,0,4);
+  glDrawArrays(GL_POINTS,0,4); //Do not touch
   vao->unbind();
 }
 
