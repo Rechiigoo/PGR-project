@@ -5,6 +5,8 @@ PROJECT(STUDENT)
 
 set(SOURCES
   project.cpp
+  blorb.cpp
+  hatblorb.cpp
   )
 
 add_library(${PROJECT_NAME} OBJECT ${SOURCES})

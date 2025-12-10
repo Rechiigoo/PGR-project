@@ -30,7 +30,7 @@ Timer<float>timer;
 
 void onInit(vars::Vars&vars){
   auto programSrc = R".(
-  uniform float iTime       = 0.f          ;
+    uniform float iTime       = 0.f;
   uniform vec2  iResolution = vec2(512,512);
 
   mat4 perspective(float fy,float a,float n,float f){
@@ -44,24 +44,25 @@ void onInit(vars::Vars&vars){
     return R;
   }
 
-  #define ROT(i,q,w)           \
-  mat4 R##i(float a){          \
-    mat4 R = mat4(1.f);        \
-    R[q][q] = R[w][w] = cos(a);\
-    R[q][w] = sin(a);          \
-    R[w][q] = -R[q][w];        \
-    return R;                  \
+  #define ROT(i,q,w)         \
+  mat4 R##i(float a){        \
+    mat4 R = mat4(1.f);         \
+    R[q][q] = R[w][w] = cos(a); \
+    R[q][w] = sin(a);           \
+    R[w][q] = -R[q][w];         \
+    return R;                   \
   }
 
-  ROT(x,1,2);
-  ROT(y,0,2);
-  ROT(z,0,1);
+  ROT(x,1,2)
+  ROT(y,0,2)
+  ROT(z,0,1)
 
   mat4 T(vec3 t){
-    mat4 T = mat4(1.f);
+    mat4 T= mat4(1.f);
     T[3] = vec4(t,1.f);
     return T;
   }
+
   mat4 T(float x,float y,float z){return T(vec3(x,y,z));}
   mat4 T(  int x,  int y,  int z){return T(vec3(x,y,z));}
   mat4 T( uint x, uint y, uint z){return T(vec3(x,y,z));}
@@ -77,18 +78,14 @@ void onInit(vars::Vars&vars){
     return transpose(R)*T(-p);
   }
 
+  #ifdef VERTEX_SHADER
 
-
-  #ifdef  VERTEX_SHADER
-  layout(location=0)in vec2 position;
+    layout(location=0)in vec2 position;
 
   mat4 proj = perspective(radians(90.),iResolution.x/iResolution.y,0.1f,1000.f);
   mat4 view = T(0,0,-3);
   mat4 model = Ry(iTime);
-  
-  
   void main() {
-
     uint indices[] = uint[](
       0u,1u,2u,2u,1u,3u,
       4u,5u,6u,6u,5u,7u,
@@ -98,51 +95,70 @@ void onInit(vars::Vars&vars){
       2u,3u,6u,6u,3u,7u
     );
 
-    if(gl_VertexID>=indices.length())return;
+    if(gl_VertexID >= indices.length()) return;
 
-    vec3 pos;
-    for(uint i=0u;i<3u;++i)
-      pos[i] = float((indices[gl_VertexID]>>i)&1u);
+    // Extract bits to build corner position
+    vec3 pos = vec3(
+      float((indices[gl_VertexID]>>0)&1u),
+      float((indices[gl_VertexID]>>1)&1u),
+      float((indices[gl_VertexID]>>2)&1u)
+    );
 
+    vec3 cubePos = 2.0 * pos - 1.0;   // Now in [-1,1]^3
 
-    gl_Position = proj*view*model*vec4(2.f*pos-1.f,1);
+    gl_Position = vec4(cubePos,1);   // Pass cube position to TES
   }
-  #endif//VERTEX_SHADER
+
+  #endif
 
 
 
-  #ifdef  CONTROL_SHADER
-  layout(vertices=3)out;
-  
+  #ifdef CONTROL_SHADER
+  layout(vertices=3) out;
+
   void main(){
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-    gl_TessLevelOuter[0] = 1;
-    gl_TessLevelOuter[1] = 1;
-    gl_TessLevelOuter[2] = 1;
+    gl_TessLevelOuter[0] = 6;
+    gl_TessLevelOuter[1] = 6;
+    gl_TessLevelOuter[2] = 6;
     gl_TessLevelOuter[3] = 1;
-    gl_TessLevelInner[0] = 1;
+    gl_TessLevelInner[0] = 6;
     gl_TessLevelInner[1] = 1;
   }
   #endif//CONTROL_SHADER
 
 
 
-  #ifdef  EVALUATION_SHADER
-  layout(triangles)in;
-  
-  void main(){
-    gl_Position = 
-      gl_in[0].gl_Position*gl_TessCoord.x+
-      gl_in[1].gl_Position*gl_TessCoord.y+
-      gl_in[2].gl_Position*gl_TessCoord.z;
+  #ifdef EVALUATION_SHADER
+  layout(triangles) in;
+
+  mat4 perspective(float fy,float a,float n,float f);
+  mat4 Ry(float a);
+  mat4 T(vec3 t);
+
+  void main() {
+
+    // Interpolate cube position (model space)
+    vec3 p =
+        gl_in[0].gl_Position.xyz * gl_TessCoord.x +
+        gl_in[1].gl_Position.xyz * gl_TessCoord.y +
+        gl_in[2].gl_Position.xyz * gl_TessCoord.z;
+
+    p = normalize(p);
+
+    // Build MVP
+    float aspect = iResolution.x / iResolution.y;
+    mat4 proj    = perspective(radians(90.), aspect, 0.1, 1000.);
+    mat4 view    = T(vec3(0,0,-3));
+    mat4 model   = Ry(iTime);
+
+    gl_Position = proj * view * model * vec4(p,1.0);
   }
   #endif//EVALUATION_SHADER
 
 
-
-  #ifdef  FRAGMENT_SHADER
+  #ifdef FRAGMENT_SHADER
   out vec4 fColor;
-  
   void main(){
     fColor = vec4(1,0,0,1);
   }
