@@ -1,8 +1,9 @@
-# FitGraphics
+# FitGraphics - PGR PROJECT 2025-26
 
 This repository contains bunch of OpenGL and rendering examples.
-The main goal is to unify courses IZG, PGR, PGRe, PGP and others that uses some kind of rendering.
-So far, it can be used as base for student project
+This acts as the base framework for the **PGR STUDENT PROJECT**
+
+All files pertaining to the project are located inside the **student** folder.
 
 ## Compilation
 On Linux:
