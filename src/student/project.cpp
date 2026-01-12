@@ -142,7 +142,7 @@ namespace student::project {
         std::filesystem::path sourcePath = __FILE__;
         std::filesystem::path sourceDir = sourcePath.parent_path();
 
-        // Combine with filename
+       
         std::filesystem::path fullPath = sourceDir / filename;
 
         // Convert to string and print for debugging
@@ -310,225 +310,11 @@ void main()
     // Make shadows more visible on the ground
     vec3 result = ambient + (1.0 - shadow) * diffuse;
     
-    // Add slight transparency so it doesn't obscure too much
+    // Slight transparency so it doesn't obscure too much
     FragColor = vec4(result, 0.95);
 }
 #endif
 ).";
-    std::string const leatherWithShadows = R".(
-#ifdef VERTEX_SHADER
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoord;
-
-out VS_OUT {
-    vec2 texCoord;
-    vec3 fragPos;
-    vec3 normal;
-    vec4 fragPosLightSpace;
-} vs_out;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
-uniform mat4 lightSpaceMatrix;
-
-void main()
-{
-    vec4 worldPos = model * vec4(aPos, 1.0);
-
-    vs_out.fragPos = worldPos.xyz;
-    vs_out.normal  = normalize(mat3(model) * aNormal);
-    vs_out.texCoord = aTexCoord;
-    vs_out.fragPosLightSpace = lightSpaceMatrix * worldPos;
-
-    gl_Position = proj * view * worldPos;
-}
-#endif
-
-#ifdef FRAGMENT_SHADER
-in VS_OUT {
-    vec2 texCoord;
-    vec3 fragPos;
-    vec3 normal;
-    vec4 fragPosLightSpace;
-} fs_in;
-
-out vec4 FragColor;
-
-uniform sampler2D alb;
-uniform sampler2D nor;
-uniform sampler2D shadowMap;
-
-uniform vec3 lightPos;
-uniform vec3 lightColor;
-uniform vec3 cameraPos;
-
-float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
-{
-    // Perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    
-    // Transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-    
-    // Get closest depth value from light's perspective
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
-    
-    // Get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-    
-    // Bias to prevent shadow acne
-    float bias = max(0.015 * (1.0 - dot(normal, lightDir)), 0.005);
-    
-    // PCF (Percentage Closer Filtering) for soft shadows
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for(int x = -1; x <= 1; ++x)
-    {
-        for(int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    shadow /= 9.0;
-    
-    // Keep the shadow at 0.0 when outside the far_plane region
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
-    
-    return shadow;
-}
-
-void main()
-{
-    //-----------------------------------------------------------
-    // Build TBN per pixel using derivatives
-    //-----------------------------------------------------------
-    vec3 N = normalize(fs_in.normal);
-
-    vec3 dp1 = dFdx(fs_in.fragPos);
-    vec3 dp2 = dFdy(fs_in.fragPos);
-    vec2 duv1 = dFdx(fs_in.texCoord);
-    vec2 duv2 = dFdy(fs_in.texCoord);
-
-    vec3 T = normalize(dp1 * duv2.y - dp2 * duv1.y);
-    vec3 B = normalize(-dp1 * duv2.x + dp2 * duv1.x);
-
-    mat3 TBN = mat3(T, B, N);
-
-    //-----------------------------------------------------------
-    // Sample and transform normal
-    //-----------------------------------------------------------
-    vec3 normalMap = texture(nor, fs_in.texCoord).rgb;
-    normalMap = normalize(normalMap * 2.0 - 1.0);
-    vec3 normal = normalize(TBN * normalMap);
-
-    //-----------------------------------------------------------
-    // Lighting vectors
-    //-----------------------------------------------------------
-    vec3 lightDir = normalize(lightPos - fs_in.fragPos);
-    vec3 viewDir  = normalize(cameraPos - fs_in.fragPos);
-
-    //-----------------------------------------------------------
-    // Ambient
-    //-----------------------------------------------------------
-    vec3 albedo = texture(alb, fs_in.texCoord).rgb;
-    vec3 ambient = 0.2 * albedo;
-
-    //-----------------------------------------------------------
-    // Diffuse
-    //-----------------------------------------------------------
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = diff * albedo;
-
-    //-----------------------------------------------------------
-    // Soft specular (leather)
-    //-----------------------------------------------------------
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(reflectDir, viewDir), 0.0), 16.0);
-    vec3 specular = spec * 0.1 * vec3(1.0);
-
-    //-----------------------------------------------------------
-    // Shadow calculation
-    //-----------------------------------------------------------
-    float shadow = ShadowCalculation(fs_in.fragPosLightSpace, normal, lightDir);
-
-    //-----------------------------------------------------------
-    // Final color (ambient not affected by shadow)
-    //-----------------------------------------------------------
-    vec3 color = ambient + (1.0 - shadow) * (diffuse + specular);
-
-    FragColor = vec4(color * lightColor, 1.0);
-}
-#endif
-).";
-    // Add these shader strings with your other shaders
-    std::string const shadowVertexShader = R".(
-#ifdef VERTEX_SHADER
-layout(location = 0) in vec3 aPos;
-
-uniform mat4 lightSpaceMatrix;
-uniform mat4 model;
-
-void main()
-{
-    gl_Position = lightSpaceMatrix * model * vec4(aPos, 1.0);
-}
-#endif
-
-#ifdef FRAGMENT_SHADER
-void main()
-{
-    // Depth is written automatically
-}
-#endif
-).";
-
-    std::string const shadowVertexShaderGLTF = R".(
-#ifdef VERTEX_SHADER
-layout(location = 0) in vec3 aPos;
-layout(location = 5) in ivec4 aBoneIDs;
-layout(location = 6) in vec4 aWeights;
-
-uniform mat4 bones[100];
-uniform mat4 lightSpaceMatrix;
-uniform mat4 model;
-
-void main()
-{
-    // Normalize weights
-    vec4 w = aWeights;
-    float sum = w.x + w.y + w.z + w.w;
-    if (sum > 0.001)
-        w /= sum;
-    else
-        w = vec4(1.0, 0.0, 0.0, 0.0);
-    
-    // Clamp bone IDs
-    ivec4 ids = clamp(aBoneIDs, ivec4(0), ivec4(99));
-    
-    // Calculate skinning matrix
-    mat4 skinMatrix = 
-        w.x * bones[ids.x] +
-        w.y * bones[ids.y] +
-        w.z * bones[ids.z] +
-        w.w * bones[ids.w];
-    
-    vec4 skinnedPos = skinMatrix * vec4(aPos, 1.0);
-    gl_Position = lightSpaceMatrix * model * skinnedPos;
-}
-#endif
-
-#ifdef FRAGMENT_SHADER
-void main()
-{
-    // Depth is written automatically
-}
-#endif
-).";
-
     std::string const gltfWithShadows = R".(
 #ifdef VERTEX_SHADER
 layout (location = 0) in vec3 aPos;
@@ -757,6 +543,8 @@ void main(){
 }
 #endif
 ).";
+
+//Debug shader to test rig building 
     std::string const gltf_noskin = R".(
 #ifdef VERTEX_SHADER
 layout (location = 0) in vec3 aPos;
@@ -913,7 +701,7 @@ void main()
 #endif
 ).";
 
-    // --- leather shader string (guarded, no #version inside) ---
+//Named leather, corresponds to the sackboy-esque shader
     std::string const leather = R".(
 #ifdef VERTEX_SHADER
 layout (location = 0) in vec3 aPos;
@@ -1433,7 +1221,7 @@ void main()
         float theta = atan2(p.z, p.x);     // [-pi, +pi]
         float phi = acos(glm::clamp(p.y / glm::length(p), -1.0f, 1.0f)); // [0, pi]
 
-        // convert to 0–1 UVs
+        // convert to 0Â–1 UVs
         float u = (theta + glm::pi<float>()) / (2.0f * glm::pi<float>());
         float vTex = phi / glm::pi<float>();
 
@@ -1840,7 +1628,6 @@ void main()
         std::cout << "TOTAL: " << allVertices.size() << " vertices, "
             << allIndices.size() << " indices (" << (allIndices.size() / 3) << " triangles)" << std::endl;
     }
-    // NEW FUNCTION: Compute rest pose
     void computeRestPose(Skeleton& skeleton) {
         std::vector<glm::mat4> globalTransforms(skeleton.bones.size());
 
@@ -1887,7 +1674,7 @@ void main()
 
         std::cout << "Building skeleton with " << jointCount << " bones" << std::endl;
 
-        // Step 1: Load inverse bind matrices
+       
         if (skin.inverseBindMatrices >= 0) {
             const tinygltf::Accessor& acc = model.accessors[skin.inverseBindMatrices];
             const tinygltf::BufferView& view = model.bufferViews[acc.bufferView];
@@ -1905,7 +1692,7 @@ void main()
             return;
         }
 
-        // Step 2: Build parent relationships
+        
         for (size_t i = 0; i < jointCount; ++i) {
             skeleton.bones[i].parent = -1;
             int jointNode = skin.joints[i];
@@ -1920,7 +1707,7 @@ void main()
             }
         }
 
-        // Step 3: Load LOCAL transforms from nodes (this is the bind pose)
+       
         for (size_t i = 0; i < jointCount; ++i) {
             int nodeIdx = skin.joints[i];
             const tinygltf::Node& node = model.nodes[nodeIdx];
@@ -2123,13 +1910,13 @@ void main()
             if (nodeIdx < model.nodes.size()) {
                 const std::string& nodeName = model.nodes[nodeIdx].name;
 
-                // Try exact match first
+               
                 if (nodeName == nameSubstring) {
                     std::cout << "Found bone '" << nodeName << "' at index " << i << " (exact match)" << std::endl;
                     return (int)i;
                 }
 
-                // Then try case-insensitive substring match
+  
                 std::string lowerName = nodeName;
                 std::string lowerSearch = nameSubstring;
                 std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
@@ -2400,7 +2187,7 @@ void main()
                 10594
             );
         }
-        //generateUVs(blorbVertices, sizeof(blorbVertices) / sizeof(BlorbVertex));
+       
 
         glGenVertexArrays(1, &mesh.vao);
         glGenBuffers(1, &mesh.vbo);
@@ -2534,7 +2321,7 @@ void main()
                 if (parentNodeIndex >= 0) break;
             }
 
-            // If we found a parent node, check if it's in the skin's joints
+            
             if (parentNodeIndex >= 0) {
                 for (size_t p = 0; p < jointCount; ++p) {
                     if (skin.joints[p] == parentNodeIndex) {
@@ -2554,7 +2341,7 @@ void main()
             }
         }
 
-        // Step 2: Load node LOCAL transforms
+        
         for (size_t i = 0; i < jointCount; ++i) {
             int nodeIdx = skin.joints[i];
             const tinygltf::Node& node = model.nodes[nodeIdx];
@@ -2582,7 +2369,7 @@ void main()
             skeleton.bones[i].localTransform = transform;
         }
 
-        // Step 3: Compute GLOBAL bind pose transforms (before loading inverse bind)
+        
         std::vector<glm::mat4> globalBindPose(jointCount);
         for (size_t i = 0; i < jointCount; ++i) {
             if (skeleton.bones[i].parent >= 0) {
@@ -2594,7 +2381,7 @@ void main()
             }
         }
 
-        // Step 4: Load inverse bind matrices
+        
         if (skin.inverseBindMatrices >= 0) {
             const tinygltf::Accessor& acc = model.accessors[skin.inverseBindMatrices];
             const tinygltf::BufferView& view = model.bufferViews[acc.bufferView];
@@ -2993,7 +2780,7 @@ void main()
 
         std::cout << "Bone 1 has " << track->keys.size() << " keyframes" << std::endl;
 
-        // Show first few keyframes
+        //Keyframe debug
         for (size_t i = 0; i < std::min(size_t(5), track->keys.size()); ++i) {
             const Keyframe& k = track->keys[i];
             std::cout << "  Keyframe " << i << " (t=" << k.time << "):" << std::endl;
@@ -3002,7 +2789,7 @@ void main()
             std::cout << "    Scale: (" << k.scale.x << ", " << k.scale.y << ", " << k.scale.z << ")" << std::endl;
         }
 
-        // Now interpolate at current time
+        
         float animTime = fmod(time, animation.duration);
         glm::mat4 interpolated = InterpolateBone(animation, 1, time);
         glm::vec3 trans(interpolated[3]);
@@ -3087,7 +2874,7 @@ void main()
             }
         }
 
-        // Apply inverse bind normally
+        
         for (size_t i = 0; i < skeleton.bones.size(); ++i) {
             skeleton.finalMatrices[i] = globalTransforms[i] * skeleton.bones[i].inverseBind;
         }
@@ -3133,7 +2920,7 @@ void main()
             return parentWorld * localTransform;
         }
 
-        // Root bone - just return local
+        
         return localTransform;
     }
 
@@ -3428,7 +3215,7 @@ void main()
             glDrawElements(GL_TRIANGLES, 10594 * 3, GL_UNSIGNED_INT, nullptr);
         }
 
-        // HAT rendering
+        // WITCH HAT rendering
         if (vars.getBool("method.hat")) {
             glUseProgram(hatPrg);
 
@@ -3500,16 +3287,10 @@ void main()
             // Create transformation for upside down and wide robe
             glm::mat4 robeTransform = glm::mat4(1.0f);
 
-            // 1. Rotate 180 degrees around X axis (flip upside down)
+           
             robeTransform = glm::rotate(robeTransform, glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-            // 2. Scale to make it wider (X and Z axes) and potentially taller (Y axis)
-            robeTransform = glm::scale(robeTransform, glm::vec3(1.2f, 1.0f, 1.2f)); // 2x wider, same height
-
-            // 3. Apply offset (adjust Y position as needed since it's upside down)
+            robeTransform = glm::scale(robeTransform, glm::vec3(1.2f, 1.0f, 1.2f)); 
             glm::mat4 robeOffset = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.8f, 0.0f));
-
-            // Combine: model * torsoTransform * offset * robeTransform
             glm::mat4 robeModel = model * torsoTransform * robeOffset * robeTransform;
 
             glProgramUniformMatrix4fv(robeprg, glGetUniformLocation(robeprg, "model"),
